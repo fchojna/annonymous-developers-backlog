@@ -9,6 +9,7 @@ use yii\web\Response;
 use yii\filters\VerbFilter;
 use app\models\LoginForm;
 use app\models\ContactForm;
+use app\models\Post;
 
 class SiteController extends Controller
 {
@@ -61,68 +62,41 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        return $this->render('index');
-    }
+        $posts = Post::find()->all();
 
-    /**
-     * Login action.
-     *
-     * @return Response|string
-     */
-    public function actionLogin()
-    {
-        if (!Yii::$app->user->isGuest) {
-            return $this->goHome();
-        }
-
-        $model = new LoginForm();
-        if ($model->load(Yii::$app->request->post()) && $model->login()) {
-            return $this->goBack();
-        }
-
-        $model->password = '';
-        return $this->render('login', [
-            'model' => $model,
+        return $this->render('index', [
+            'posts' => $posts,
         ]);
     }
 
     /**
-     * Logout action.
-     *
-     * @return Response
-     */
-    public function actionLogout()
-    {
-        Yii::$app->user->logout();
-
-        return $this->goHome();
-    }
-
-    /**
-     * Displays contact page.
-     *
-     * @return Response|string
-     */
-    public function actionContact()
-    {
-        $model = new ContactForm();
-        if ($model->load(Yii::$app->request->post()) && $model->contact(Yii::$app->params['adminEmail'])) {
-            Yii::$app->session->setFlash('contactFormSubmitted');
-
-            return $this->refresh();
-        }
-        return $this->render('contact', [
-            'model' => $model,
-        ]);
-    }
-
-    /**
-     * Displays about page.
+     * Displays post page.
      *
      * @return string
      */
-    public function actionAbout()
+    public function actionPost($id = 0)
     {
-        return $this->render('about');
+        $post = Post::findOne($id);
+        if ($post === null) {
+            $post = new Post();
+            $post->title = 'POST NOT FOUND!';
+        }
+        return $this->render('post', [
+            'post' => $post,
+        ]);
+    }
+
+    /**
+     * Displays post list page.
+     *
+     * @return string
+     */
+    public function actionPostList()
+    {
+        $posts = Post::find()->all();
+
+        return $this->render('post-list', [
+            'posts' => $posts,
+        ]);
     }
 }
